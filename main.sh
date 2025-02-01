@@ -46,7 +46,7 @@ figlet Backrooms
 
 while :;do
 
-    read -p "# " opt
+    read -p "(nivel:thehub)# " opt
     case "$opt" in
 
         # Basico
@@ -58,28 +58,34 @@ while :;do
             exit 0
         ;;
 
-        status)
+        clear|cls)
+            clear
+            figlet Backrooms
+            [[ "$historia_base_primeira" = "off" ]] && { historia_base ;}
+        ;;
+
+        status|ss)
             status
         ;;
 
-        inventario)
+        inventario|inv|i)
             _inventario
         ;;
 
-        scan)
-            scan_itens
-        ;;
-
-        usar)
-            _usar_item
-        ;;
-
-        noclipping)
+        noclipping|noclip|nc)
             _noclipping
         ;;
 
+        scan)
+             echo "[!] Você não pode usar o scan aqui! [!]"
+        ;;
+
+        usar)
+             echo "[!] Vocẽ não pode usar nenhum item aqui! [!]"
+        ;;
+
         *)
-            echo "Error! Comando não encontrado, utilize o comando help para visualizar o menu de ajuda"
+            echo "[!] Error! Comando não encontrado, utilize o comando help para visualizar o menu de ajuda! [!]"
     esac
 done
 

@@ -7,27 +7,12 @@ source ./src/libs/func.sh
 source ./src/libs/entidades.sh
 source ./src/libs/itens.sh
 
-# Caminho do arquivo de configuração do jogador
-PLAYER_CONF="$PWD/src/db/player.conf"
-
-# Função para recuperar dados do jogador
-function get_player_data() {
-    local key=$1
-    grep "^$key=" "$PLAYER_CONF" | cut -d'=' -f2 | tr -d '"'
-}
-
-# Função para atualizar dados do jogador
-function update_player_data() {
-    local key=$1
-    local value=$2
-    sed -i "s/^$key=.*/$key=\"$value\"/" "$PLAYER_CONF"
-}
-
 # Função para exibir a descrição do nível 0
 function show_level_description() {
     echo ""
     echo -e "Você caiu no nível 0 das Backrooms.\nSeu objetivo é sair daqui!\nBoa sorte!\n"
     echo -e "Descrição:"
+    echo -e "\nDificuldade de Sobrevivência: Classe 1\nSeguro.\nProtegido.\nContagem Mínima de Entidades.\n"
     echo -e "O nível 0 é um espaço não linear, semelhante às salas dos fundos de uma saída de varejo. Todas as salas no nível 0 parecem uniformes e compartilham características superficiais, como um papel de parede amarelado, tapete úmido e iluminação fluorescente colocada inconsistentemente. No entanto, não há dois quartos dentro do nível idênticos.\n"
     echo -e "A iluminação instalada pisca de forma inconsistente e zumbem em uma frequência constante. Esse zumbido é notavelmente mais alto e mais desagradável do que o zumbido fluorescente comum. A substância saturando o tapete não pode ser consistentemente identificada. Não é água, nem é seguro consumir.\n"
     echo -e "Os espaços lineares no nível 0 são alterados drasticamente; É possível caminhar em uma linha reta e retornar ao ponto de partida, e refazer suas etapas resultará em um conjunto diferente de salas que aparecem das que já foram passadas. Devido a isso e à semelhança visual entre os quartos, a navegação consistente é extremamente difícil. Dispositivos como bússolas e localizadores de GPS não funcionam no nível, e as comunicações de rádio são distorcidas e não confiáveis.\n"
@@ -38,12 +23,12 @@ function show_level_description() {
 function try_noclip() {
     local chance=$((1 + RANDOM % 10))  # 10% de chance de sucesso
     if [[ "$chance" -eq 1 ]]; then
-        echo -e "\nVocê conseguiu fazer noclip e sair do nível 0!"
+        echo -e "\n[+] Você conseguiu fazer noclip e sair do nível 0! [+]"
         update_player_data "nivel" "1"
         player_room=$(get_player_data "nivel")
         bash "./src/rooms/room${player_room}/room${player_room}.sh"
     else
-        echo -e "\nVocê tentou fazer noclip, mas não teve sucesso. Tente novamente!"
+        echo -e "\n[!] Você tentou fazer noclip, mas não teve sucesso. Tente novamente! [!]"
     fi
 }
 
@@ -52,31 +37,27 @@ function generate_random_event() {
     local random=$((1 + RANDOM % 10))
     case "$random" in
         3)
-            echo -e "\nVocê encontrou a sala da malina!"
-            echo -e "Após vasculhar dentro da sala, você encontrou um documento!\nDeseja abrir o documento? [s/n]"
-            read -p "# " opt_sn
+            echo -e "\n[+] Você encontrou a sala da malina! [+]"
+            echo -e "[-] Após vasculhar dentro da sala, você encontrou um documento!\nDeseja abrir o documento? [s/n]"
+            read -p "> " opt_sn
             if [[ "${opt_sn,,}" = "s" ]]; then
-                echo -e "\nVocê abriu o documento!"
-                echo -e "Nele dizia as instruções de como se movimentar entre os níveis! A forma básica de se movimentar entre os níveis é através do noclip, mas você tem uma pequena chance de ter sucesso!"
+                echo -e "\n[-] Você abriu o documento! [-]"
+                echo -e "[-] Nele dizia as instruções de como se movimentar entre os níveis! A forma básica de se movimentar entre os níveis é através do noclip, mas você tem uma pequena chance de ter sucesso! [-]"
+            else
+                echo "\n[!] Você escolheu não abrir o documento! [!]"
             fi
-            ;;
-        7)
-            echo -e "\nVocê encontrou a sala vermelha!"
-            echo -e "Infelizmente, não há uma saída aqui. Aceite seu destino!"
-            ;;
-        *)
-            echo "Você continua andando, mas não encontra nada de interessante."
-            ;;
-    esac
-}
+        ;;
 
-# Função para verificar a sanidade do jogador
-function check_sanity() {
-    local player_sanidade=$(get_player_data "sanidade")
-    if [[ "$player_sanidade" -le 0 ]]; then
-        echo -e "\nSua sanidade chegou a 0! Você perdeu o controle e ficou preso nas Backrooms para sempre."
-        exit 1
-    fi
+        7)
+            echo -e "\n[!] Você encontrou a sala vermelha! [!]"
+            echo -e "[!] Infelizmente, não há uma saída aqui. Aceite seu destino! [!]"
+            exit 1
+        ;;
+
+        *)
+            echo "[+] Você continua andando, mas não encontra nada de interessante. [+]"
+        ;;
+    esac
 }
 
 # Função principal do nível 0
@@ -90,45 +71,45 @@ function main() {
     # Loop principal do nível 0
     while :; do
         echo ""
-        read -p "# " opt_m
+        read -p "(nivel:0)# " opt_m
 
         # Verifica a sanidade do jogador antes de cada ação
         check_sanity
 
-        case "$opt_m" in
-            frente)
-                echo "Você andou para frente..."
+        case "${opt_m,,}" in
+            frente|fr)
+                echo "[-] Você andou para frente..."
                 sleep 2
                 generate_random_event
             ;;
 
-            esquerda)
-                echo "Você virou à esquerda..."
+            esquerda|es)
+                echo "[-] Você virou à esquerda..."
                 sleep 2
                 generate_random_event
             ;;
 
-            direita)
-                echo "Você virou à direita..."
+            direita|di)
+                echo "[-] Você virou à direita..."
                 sleep 2
                 generate_random_event
             ;;
 
-            atras)
-                echo "Você andou para trás..."
+            atras|at)
+                echo "[-] Você andou para trás..."
                 sleep 2
                 generate_random_event
             ;;
 
-            noclipping)
+            noclipping|noclip|nc)
                 try_noclip
             ;;
 
-            status)
+            status|ss)
                 status
             ;;
 
-            inventario)
+            inventario|inv|i)
                 _inventario
             ;;
 
@@ -138,6 +119,20 @@ function main() {
 
             usar)
                 _usar_item
+            ;;
+
+            drop)
+                _remover_item "$1"
+            ;;
+
+            exit)
+                exit 0
+            ;;
+
+            clear|cls)
+                clear
+                figlet Backrooms
+                show_level_description
             ;;
 
             *)
